@@ -12,14 +12,12 @@ Eigen::VectorXd Tools::CalculateRMSE(const vector<Eigen::VectorXd> &estimations,
   Eigen::VectorXd rmse(4);
   rmse << 0, 0, 0, 0;
 
-  // TODO: YOUR CODE HERE
   int n1 = estimations.size();
   int n2 = ground_truth.size();
 
   // check the validity of the following inputs:
   //  * the estimation vector size should not be zero
   //  * the estimation vector size should equal ground truth vector size
-  // ... your code here
   if((n1+n2 == 0) || (n1 != n2)) {
     std::cout << "estimations and ground truth vectors must not be empty and of equal dimensions." << std::endl;
     return rmse;
@@ -36,15 +34,8 @@ Eigen::VectorXd Tools::CalculateRMSE(const vector<Eigen::VectorXd> &estimations,
     rmse += residual;
   }
 
-  //calculate the mean
-  // ... your code here
-  rmse = rmse.array()/n1;
-
-  //calculate the squared root
-  // ... your code here
-  rmse = rmse.array().sqrt();
-
-  //return the result
+  rmse = rmse.array()/n1; //calculates the mean
+  rmse = rmse.array().sqrt(); //calculates the squared root
   return rmse;
 
 }
@@ -56,8 +47,6 @@ Eigen::MatrixXd Tools::CalculateJacobian(const Eigen::VectorXd &x_state) {
   float py = x_state(1);
   float vx = x_state(2);
   float vy = x_state(3);
-
-  //TODO: YOUR CODE HERE
 
   //check division by zero
   if(px+py == 0) {

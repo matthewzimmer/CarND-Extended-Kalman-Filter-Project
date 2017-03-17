@@ -1,11 +1,9 @@
 #include "FusionEKF.h"
-#include "tools.h"
-#include "Eigen/Dense"
 #include <iostream>
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "IncompatibleTypes"
 using namespace std;
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
 using std::vector;
 
 /*
@@ -17,10 +15,10 @@ FusionEKF::FusionEKF() {
   previous_timestamp_ = 0;
 
   // initializing matrices
-  R_laser_ = MatrixXd(2, 2);
-  R_radar_ = MatrixXd(3, 3);
-  H_laser_ = MatrixXd(2, 4);
-  Hj_ = MatrixXd(3, 4);
+  R_laser_ = Eigen::MatrixXd(2, 2);
+  R_radar_ = Eigen::MatrixXd(3, 3);
+  H_laser_ = Eigen::MatrixXd(2, 4);
+  Hj_ = Eigen::MatrixXd(3, 4);
 
   //measurement covariance matrix - laser
   R_laser_ << 0.0225, 0,
@@ -60,7 +58,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     */
     // first measurement
     cout << "EKF: " << endl;
-    ekf_.x_ = VectorXd(4);
+    ekf_.x_ = Eigen::VectorXd(4);
     ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
@@ -113,3 +111,5 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   cout << "x_ = " << ekf_.x_ << endl;
   cout << "P_ = " << ekf_.P_ << endl;
 }
+
+#pragma clang diagnostic pop

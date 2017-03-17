@@ -8,6 +8,8 @@
 #include "ground_truth_package.h"
 #include "measurement_package.h"
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "IncompatibleTypes"
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -182,3 +184,5 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+
+#pragma clang diagnostic pop
