@@ -24,7 +24,7 @@ public:
   /**
   * Run the whole flow of the Kalman Filter from here.
   */
-  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+  void ProcessMeasurement(MeasurementPackage &measurement_pack);
 
   /**
   * Kalman Filter update and prediction math lives in here.
@@ -32,7 +32,7 @@ public:
   KalmanFilter ekf_;
 
 private:
-  // check whether the tracking toolbox was initiallized or not (first measurement)
+  // check whether the tracking toolbox was initialized or not (first measurement)
   bool is_initialized_;
 
   // previous timestamp
@@ -44,6 +44,10 @@ private:
   Eigen::MatrixXd R_radar_;
   Eigen::MatrixXd H_laser_;
   Eigen::MatrixXd Hj_;
+
+  //acceleration noise components
+  float noise_ax;
+  float noise_ay;
 };
 
 #endif /* FusionEKF_H_ */

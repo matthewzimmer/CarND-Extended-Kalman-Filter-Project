@@ -25,18 +25,146 @@ Self-Driving Car Engineer Nanodegree Program
    some sample inputs in 'data/'.
     - eg. `./ExtendedKF ../data/sample-laser-radar-measurement-data-1.txt output.txt`
 
-## Editor Settings
+## Algorithm Breakdown
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+##### main.cpp
+
+`int main(int argc, char* argv[]) {`
+
+1. Ensure program arguments correspond to valid files by inspecting `argv[1]` and `argv[2]` values
+
+2. Assign the first argument `argv[1]` to the in_file_name_ (_data/sample-laser-radar-measurement-data-1.txt_) string 
+variable
+
+3. Intialize the `in_file_`'s input file stream (`ifstream`) variable to read the input data
+
+4. Assign the second argument `argv[2]` to the `out_file_name_` string variable 
+
+5. Initialize the `out_file_` output file stream (`ofstream`) variable to write output data to
+
+6. Determine whether `in_file_` and `out_file_` are open. If one is, print an error message and exit the program via 
+`exit(EXIT_FAILURE)`
+
+7. Initialize the `std::vector`s `measurement_pack_list<MeasurementPackage>` and `gt_pack_list<GroundTruthPackage>`
+
+8. Using [istream::getline](http://www.cplusplus.com/reference/istream/istream/getline/), prepare the measurement 
+packages (each line represents a measurement at a timestamp) by iterating over `in_file_`
+
+    a. Inside the while loop, the following occurs:
+    
+       i. declare the `sensor_type` variable which will be equal to either "L" or "R"
+       
+       ii. initialize the meas_package and gt_package variables
+       
+       iii. initialize the iss variable of type istringstream representing the current string line being processed
+       
+       iv. initialize a timestamp variable of type long representing the measurement time
+       
+       v. read in the the first character assigning it to sensor_type:
+
+            1. if "L" (LIDAR measurement):
+            
+                a. Declare MeasurementPackage#sensor_type_ variable equal to MeasurementPackage::LASER
+                
+                b. Initialize MeasurementPackage#raw_measurements_ to a 2D VectorXd(2)
+                
+                c. Read in the next 2 sections corresponding to the raw position measurments px and py of type float
+                
+                d. Assign the MeasurementPackage#raw_measurements_ vector the measurement values px and py
+                
+                e. Read in the timestamp corresponding to the LIDAR measurement time and assign it to 
+                   MeasurementPackage#timestamp_
+
+                f. Push the meas_package variable declared in 8a(ii) onto the measurement_pack_list<MeasurementPackage> 
+                   vector initialzied in 7.
+                   
+            2. if "R" (RADAR measurement):
+
+                a. Declare MeasurementPackage#sensor_type_ variable equal to MeasurementPackage::RADAR
+                
+                b. Initialize MeasurementPackage#raw_measurements_ to a 3D VectorXd(3)
+                
+                c. Read in the next 3 sections corresponding to the raw position measurments rho (range), phi (bearing) 
+                   and rho_dot (range rate) of type float
+                   
+                d. Assign the MeasurementPackage#raw_measurements_ vector the measurement values rho, phi and rho_dot
+                
+                e. Read in the timestamp corresponding to the RADAR measurement time and assign it to 
+                   MeasurementPackage#timestamp_
+
+                f. Push the meas_package variable declared in 8a(ii) onto the measurement_pack_list<MeasurementPackage> 
+                   vector initialzied in 7.
+                   
+       vi. Read ground truth data to compare later
+       
+            1. Declares 4 variables corresponding to the ground truth position and velocity: 
+               
+               (px_gt, py_gt, vx_gt, vy_gt)^T
+               
+            2. Initialize GroundTruth#gt_values_ vector to a 4D VectorXd(4)
+            
+            3. Assign px_gt, py_gt, vx_gt and vy_gt to gt_values_ vector
+            
+9. Instantiate an instance of the `FusionEKF` class to the variable `fusionEKF`
+
+10. Initialize our `estimations` and `ground_truth` RMSE results of type `vector<VectorXd>`. 
+    __***We are ultimately graded on these numbers!***__
+
+11. *Call the EKF-based fusion* by iterating over each item in `measurement_pack_list` 
+    (of type `vector<MeasurementPackage>`). The following occurs inside this for loop:
+
+    a. Start filtering from the second frame (the speed is unknown in the first frame)
+        
+    ```
+    fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
+    ```
+
+    b. Write to `out_file_` (e.g., _build/output.txt_) the estimated position and velocity values of the 
+       `KalmanFilter#x_` vector representing the state of the vehicle `(px, py, vx, vy)^T` after performing the 
+       prediction and measurement updates for both Lidar and Radar measurements. Note each item in 
+       the `KalmanFilter#x_` vector is printed to the `ofstream` separated by tabs (via `"\t"` at the end of each line).
+       
+    c. Invoke `MeasurementPackage#estimations` and write out the new `px` and `py` estimations performed in *11a* above 
+       (__VERIFY ACCURACY OF THIS STATEMENT__). 
+
+        i. I added the MeasurementPacakage#estimations method to DRY up the code a bit and encapsulate the RADAR 
+           sensor's polor-to-cartesian conversion inside the MeasurementPackage object itself.
+        
+        ii. Inside this method, if the current measurement's sensor type is RADAR, convert the RADAR mesurement's rho 
+            and phi from polar coordinates to cartesian (x,y) coordinates like so:
+            
+            rho = px;
+            phi = py;
+            
+            px = rho * sin(phi);  
+            py = rho * cos(phi);
+
+    d. Write to `outfile` (e.g., *build/output.txt*) the ground truth values for `(px, py, vx, vy)^T`. We will use these 
+       ground truth values to compute the *RMSE* to determine how well our Extended Kalman Filter algorithm is doing in 
+       terms of tracking our pedestrian at each LIDAR or RADAR measurement at time `t`.
+
+    e. Push `fusionEKF.ekf.x_`, our 4D  VectorXd corresponding to our `(px, py, vx, vy)^T` estimation of position and 
+       velocity at time `t`, on to our `estimations` stack (an instance of `vector<VectorXd>`).
+       
+    f. Push `gt_pack_list[k].gt_values_`, our 4D  VectorXd corresponding to the actual `(px, py, vx, vy)^T` position 
+       and velocity of our pedestrian at time `t`, onto our `ground_truth` stack (an instance of `vector<VectorXd>`)
+
+12. Compute the accuracy (*RMSE* - Root Mean Squared Error) of our estimations compared to ground truth by passing our 
+    `estimations` and `ground_truth` `vector<VectorXd>`s to [Tools#CalculateRMSE](https://github.com/matthewzimmer/CarND-Extended-Kalman-Filter-Project/blob/7e0aa46c0508904f14e88757401b2cbd805ddf76/src/tools.cpp#L10-L41).
+
+13. Close our `out_file_` and `in_file_` file streams.
+
+14. Exit the program return 0 indicating success.
+
+}
 
 ## Code Style
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+*I extracted the following from the open-source AirSim github repository because it is precisely how I think about Code 
+Style.*
+
+
 
 ## Generating Additional Data
 
