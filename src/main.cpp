@@ -137,9 +137,8 @@ int main(int argc, char *argv[]) {
   for (size_t k = 0; k < N; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
-    bool measured_ = fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
-
-    if (measured_) {
+    bool measurementProcessed = fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
+    if (measurementProcessed) {
       // output the estimation
       out_file_ << fusionEKF.ekf_.x_(0) << "\t"; // px
       out_file_ << fusionEKF.ekf_.x_(1) << "\t"; // py
@@ -152,9 +151,6 @@ int main(int argc, char *argv[]) {
       Eigen::VectorXd measurement_estimations = measurement_pack_list[k].estimations();
       out_file_ << measurement_estimations(0) << "\t"; // px_dot
       out_file_ << measurement_estimations(1) << "\t"; // py_dot
-
-//    cout << measurement_pack_list[k].sensor_type_ << "\t" << measurement_pack_list[k].raw_measurements_(0) << "\t" << measurement_pack_list[k].raw_measurements_(1) << endl;
-//    cout << measurement_pack_list[k].sensor_type_ << "\t" << measurement_estimations(0) << "\t" << measurement_estimations(1) << endl;
 
       // output the ground truth packages
       out_file_ << gt_pack_list[k].gt_values_(0) << "\t"; // ground truth px

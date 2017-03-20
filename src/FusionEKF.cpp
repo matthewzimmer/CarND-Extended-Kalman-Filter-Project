@@ -136,9 +136,7 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
   /*****************************************************************************
    *  Update
    ****************************************************************************/
-  Eigen::VectorXd z_;
-  z_ = measurement_pack.estimations();
-//  cout << "z= " << z_ << endl;
+  Eigen::VectorXd z = measurement_pack.estimations();
 
   /**
    TODO:
@@ -146,64 +144,28 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
      * Update the state and covariance matrices.
    */
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-//    // Radar updates
-//    Hj_ = tools.CalculateJacobian(ekf_.x_);
-//
-//    // y = z - Hj * x
-//    // S = Hj * P * Hj^T + R_radar_
-//    // K = P *Hj^T * S^-1
-//    // x' = x + K * y
-//    // P' = (I-K*Hj)*P
-//
-//    VectorXd y = z_ - Hj_ * ekf_.x_;
-//    MatrixXd Ht = ekf_.H_.transpose();
-//    MatrixXd S = ekf_.H_ * ekf_.P_ * Ht + R_laser_;
-//    MatrixXd Sinv = S.inverse();
-//    MatrixXd K = ekf_.P_ * Ht * Sinv;
-//
-//    // new state
-//    ekf_.x_ = ekf_.x_ + K * y;
-//    size_t sizeX = ekf_.x_.size();
-//    MatrixXd I = MatrixXd::Identity(sizeX, sizeX);
-//    ekf_.P_ = (I - K * ekf_.H_) * ekf_.P_;
-
-//    ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
-//    ekf_.UpdateEKF(z_);
-
+    // Radar updates
+    Hj_ = tools.CalculateJacobian(ekf_.x_);
+    ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
+    ekf_.UpdateEKF(z);
+    cout << "x_ = " << ekf_.x_ << endl;
+    cout << "P_ = " << ekf_.P_ << endl;
     return false;
 
   } else {
     // Laser updates
-    // y = z - H * x
-    // S = H * P * H^T + R_laser_
-    // K = P *H^T * S^-1
-    // x' = x + K * y
-    // P' = (I-K*H)*P
-
-//    // KF Measurement update step
-//    VectorXd y = z_ - ekf_.H_ * ekf_.x_;
-//    MatrixXd Ht = ekf_.H_.transpose();
-//    MatrixXd S = ekf_.H_ * ekf_.P_ * Ht + R_laser_;
-//    MatrixXd Sinv = S.inverse();
-//    MatrixXd K = ekf_.P_ * Ht * Sinv;
-//
-//    // new state
-//    ekf_.x_ = ekf_.x_ + K * y;
-//    size_t sizeX = ekf_.x_.size();
-//    MatrixXd I = MatrixXd::Identity(sizeX, sizeX);
-//    ekf_.P_ = (I - K * ekf_.H_) * ekf_.P_;
-
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, ekf_.H_, R_laser_, ekf_.Q_);
-    ekf_.Update(z_);
+    ekf_.Update(z);
   }
 
   // KF Prediction step
 //  ekf_.x_ = ekf_.F_ * x_prime;// + u;
 //  ekf_.P_ = ekf_.F_ * P_prime * ekf_.F_.transpose() + ekf_.Q_;
+  ekf_.Predict();
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+//  cout << "x_ = " << ekf_.x_ << endl;
+//  cout << "P_ = " << ekf_.P_ << endl;
 
   return true;
 }
