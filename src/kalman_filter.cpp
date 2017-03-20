@@ -58,10 +58,13 @@ void KalmanFilter::Update(const Eigen::VectorXd &z) {
   P_ = (I - K * H_) * P_;
 //  cout << "P_ = (I - K * H_) * P_ == " << P_ << endl << endl;
 
-  x_ = F_ * x_; // + u;
+//  x_ = F_ * x_; // + u;
 //  cout << "x_ = F_ * x_ == " << x_ << endl << endl;
-  Eigen::MatrixXd Ft = F_.transpose();
-  P_ = F_ * P_ * Ft + Q_;
+//  Eigen::MatrixXd Ft = F_.transpose();
+//  P_ = F_ * P_ * Ft + Q_;
+
+  Predict();
+
 //  cout << "P_ = F_ * P_ * Ft + Q_ == " << P_ << endl << endl;
 //  cout << endl << "************************************************" << endl << endl;
 }
@@ -71,6 +74,8 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+  cout << endl << "RADAR UPDATE ************************************************" << endl << endl;
+  cout << "z= " << z << endl << endl;
 
   Eigen::VectorXd y = z - H_ * x_;
   Eigen::MatrixXd Ht = H_.transpose();
@@ -85,9 +90,11 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
   Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
 
-  x_ = F_ * x_; // + u;
-  Eigen::MatrixXd Ft = F_.transpose();
-  P_ = F_ * P_ * Ft + Q_;
+//  x_ = F_ * x_; // + u;
+//  Eigen::MatrixXd Ft = F_.transpose();
+//  P_ = F_ * P_ * Ft + Q_;
+
+  Predict();
 }
 
 #pragma clang diagnostic pop

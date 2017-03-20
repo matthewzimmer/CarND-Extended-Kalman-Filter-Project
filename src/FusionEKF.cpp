@@ -66,7 +66,7 @@ FusionEKF::FusionEKF() {
 */
 FusionEKF::~FusionEKF() {}
 
-void FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
+bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
 
 
   /*****************************************************************************
@@ -90,7 +90,7 @@ void FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
 
     if (px == 0 || py == 0){
       cout << "Error in initializing state matrix";
-      return;
+      return false;
     }
 
     ekf_.x_ << px, py, 0, 0;
@@ -99,7 +99,7 @@ void FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
-    return;
+    return true;
   }
 
   /*****************************************************************************
@@ -170,6 +170,8 @@ void FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
 //    ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
 //    ekf_.UpdateEKF(z_);
 
+    return false;
+
   } else {
     // Laser updates
     // y = z - H * x
@@ -202,6 +204,8 @@ void FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
   cout << "P_ = " << ekf_.P_ << endl;
+
+  return true;
 }
 
 #pragma clang diagnostic pop

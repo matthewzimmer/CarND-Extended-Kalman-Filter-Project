@@ -15,7 +15,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
 
-void check_arguments(int argc, char* argv[]) {
+void check_arguments(int argc, char *argv[]) {
   string usage_instructions = "Usage instructions: ";
   usage_instructions += argv[0];
   usage_instructions += " path/to/input.txt output.txt";
@@ -38,8 +38,8 @@ void check_arguments(int argc, char* argv[]) {
   }
 }
 
-void check_files(ifstream& in_file, string& in_name,
-                 ofstream& out_file, string& out_name) {
+void check_files(ifstream &in_file, string &in_name,
+                 ofstream &out_file, string &out_name) {
   if (!in_file.is_open()) {
     cerr << "Cannot open input file: " << in_name << endl;
     exit(EXIT_FAILURE);
@@ -51,7 +51,7 @@ void check_files(ifstream& in_file, string& in_name,
   }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
   check_arguments(argc, argv);
 
@@ -137,32 +137,34 @@ int main(int argc, char* argv[]) {
   for (size_t k = 0; k < N; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
-    fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
+    bool measured_ = fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
 
-    // output the estimation
-    out_file_ << fusionEKF.ekf_.x_(0) << "\t"; // px
-    out_file_ << fusionEKF.ekf_.x_(1) << "\t"; // py
-    out_file_ << fusionEKF.ekf_.x_(2) << "\t"; // vx
-    out_file_ << fusionEKF.ekf_.x_(3) << "\t"; // vy
+    if (measured_) {
+      // output the estimation
+      out_file_ << fusionEKF.ekf_.x_(0) << "\t"; // px
+      out_file_ << fusionEKF.ekf_.x_(1) << "\t"; // py
+      out_file_ << fusionEKF.ekf_.x_(2) << "\t"; // vx
+      out_file_ << fusionEKF.ekf_.x_(3) << "\t"; // vy
 
 
-    // output the measurements
-    // output the estimation
-    Eigen::VectorXd measurement_estimations = measurement_pack_list[k].estimations();
-    out_file_ << measurement_estimations(0) << "\t"; // px_dot
-    out_file_ << measurement_estimations(1) << "\t"; // py_dot
+      // output the measurements
+      // output the estimation
+      Eigen::VectorXd measurement_estimations = measurement_pack_list[k].estimations();
+      out_file_ << measurement_estimations(0) << "\t"; // px_dot
+      out_file_ << measurement_estimations(1) << "\t"; // py_dot
 
 //    cout << measurement_pack_list[k].sensor_type_ << "\t" << measurement_pack_list[k].raw_measurements_(0) << "\t" << measurement_pack_list[k].raw_measurements_(1) << endl;
-    cout << measurement_pack_list[k].sensor_type_ << "\t" << measurement_estimations(0) << "\t" << measurement_estimations(1) << endl;
+//    cout << measurement_pack_list[k].sensor_type_ << "\t" << measurement_estimations(0) << "\t" << measurement_estimations(1) << endl;
 
-    // output the ground truth packages
-    out_file_ << gt_pack_list[k].gt_values_(0) << "\t"; // ground truth px
-    out_file_ << gt_pack_list[k].gt_values_(1) << "\t"; // ground truth py
-    out_file_ << gt_pack_list[k].gt_values_(2) << "\t"; // ground truth vx
-    out_file_ << gt_pack_list[k].gt_values_(3) << "\n"; // ground truth vy
+      // output the ground truth packages
+      out_file_ << gt_pack_list[k].gt_values_(0) << "\t"; // ground truth px
+      out_file_ << gt_pack_list[k].gt_values_(1) << "\t"; // ground truth py
+      out_file_ << gt_pack_list[k].gt_values_(2) << "\t"; // ground truth vx
+      out_file_ << gt_pack_list[k].gt_values_(3) << "\n"; // ground truth vy
 
-    estimations.push_back(fusionEKF.ekf_.x_);
-    ground_truth.push_back(gt_pack_list[k].gt_values_);
+      estimations.push_back(fusionEKF.ekf_.x_);
+      ground_truth.push_back(gt_pack_list[k].gt_values_);
+    }
   }
 
   // compute the accuracy (RMSE)
