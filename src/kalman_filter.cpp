@@ -39,8 +39,6 @@ void KalmanFilter::Update(const Eigen::VectorXd &z) {
   size_t x_size = x_.size();
   Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
-
-//  Predict();
 }
 
 void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
@@ -59,11 +57,6 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
   float rho = sqrt(px*px + py*py); // The range, ρ, is the distance to the pedestrian
   float theta = atan(py/px); // φ is the angle between ρ and the x direction
   float rho_dot = (px*vx + py*vy)/rho; // The range rate, ​ρ​˙, is the projection of the velocity, v
-
-  // The second value in the polar coordinate vector is the angle ϕ. Need to make sure to normalize ϕ in the y vector
-  // so that its angle is between -pi and pi; in other words, add or subtract 2*pi from ϕ until it is
-  // between -pi and pi.
-//  theta = (theta - -1*M_PI)/(M_PI - -1*M_PI);
 
   Eigen::VectorXd hx = Eigen::VectorXd(3);
   hx << rho, theta, rho_dot;
