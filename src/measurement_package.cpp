@@ -8,21 +8,35 @@
 #pragma ide diagnostic ignored "IncompatibleTypes"
 Eigen::VectorXd MeasurementPackage::estimations() {
   Eigen::VectorXd result;
-  result = Eigen::VectorXd(2);
-
-  // LIDAR estimation
-  float px = raw_measurements_(0);
-  float py = raw_measurements_(1);
 
   // If RADAR sensor type, convert estimation from
   // polar (rho, phi) to cartesian (x, y) coordinates.
   if(sensor_type_ == SensorType::RADAR) {
-    px = px * cos(py); // px == rho
-    py = px * sin(py); // py == phi
+    result = Eigen::VectorXd(3);
+
+    // RADAR estimation
+    float rho = raw_measurements_(0);
+    float phi = raw_measurements_(1);
+    float rho_dot = raw_measurements_(2);
+
+//    const float TWO_PI = 2*M_PI;
+//    phi = (phi - -1*M_PI)/(M_PI- -1*M_PI);
+
+    result << rho,
+              phi,
+              rho_dot;
+
+  } else {
+    result = Eigen::VectorXd(2);
+
+    // LIDAR estimation
+    float px = raw_measurements_(0);
+    float py = raw_measurements_(1);
+
+    result << px,
+              py;
   }
 
-  result << px,
-            py;
 
   return result;
 }

@@ -29,17 +29,13 @@ void KalmanFilter::Init(Eigen::VectorXd &x_in, Eigen::MatrixXd &P_in, Eigen::Mat
 
 void KalmanFilter::Predict() {
   x_ = F_ * x_;
-//  cout << "x_ " << x_ << endl;
-
   Eigen::MatrixXd Ft = F_.transpose();
-//  cout << "Ft= " << Ft << endl;
-
   P_ = F_ * P_ * Ft + Q_;
-//  cout << "P_= " << P_ << endl;
 }
 
 void KalmanFilter::Update(const Eigen::VectorXd &z) {
-  Eigen::VectorXd y = z - H_ * x_; // error calculation given our new measurement z
+  Eigen::VectorXd z_pred = H_ * x_;
+  Eigen::VectorXd y = z - z_pred; // error calculation given our new measurement z
   Eigen::MatrixXd Ht = H_.transpose(); // H matrix transposed
   Eigen::MatrixXd S = H_ * P_ * Ht + R_; // S matrix
   Eigen::MatrixXd Si = S.inverse(); // S' inverse matrix
@@ -47,17 +43,39 @@ void KalmanFilter::Update(const Eigen::VectorXd &z) {
 
   //new updated state x_ and covariance matrix P_
   x_ = x_ + (K * y);
-  long x_size = x_.size();
+  size_t x_size = x_.size();
   Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
+
+//  Predict();
 }
 
 void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
   /**
   TODO:
     * update the state by using Extended Kalman Filter equations
+    *
+    * Classroom inspiration for this algorithm: https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/3612b91d-9c33-47ad-8067-a572a6c93837/concepts/f3b2b918-00d5-4af0-9363-410d01b0a1a7
   */
-  Eigen::VectorXd y = z - H_ * x_;
+  float px = x_[0];
+  float py = x_[1];
+  float vx = x_[2];
+  float vy = x_[3];
+
+  Eigen::VectorXd h = Eigen::VectorXd(3);
+  float h1 = sqrt(px*px + py*py);
+  float h2 = atan(py/px);
+  float h3 = (px*vx + py*vy)/h1;
+  h << h1, h2, h3;
+
+  Eigen::VectorXd y = z - h;
+  cout << "y= " << y << endl;
+  // The second value in the polar coordinate vector is the angle ϕ. Need to make sure to normalize ϕ in the y vector
+  // so that its angle is between -pi and pi; in other words, add or subtract 2*pi from ϕ until it is
+  // between -pi and pi.
+  y << y[0],
+       (y[1] - -1*M_PI)/(M_PI - -1*M_PI),
+       y[2];
   Eigen::MatrixXd Ht = H_.transpose();
   Eigen::MatrixXd S = H_ * P_ * Ht + R_;
   Eigen::MatrixXd Si = S.inverse();
@@ -65,7 +83,7 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
 
   //new updated state x_ and covariance matrix P_
   x_ = x_ + (K * y);
-  long x_size = x_.size();
+  size_t x_size = x_.size();
   Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
 }
