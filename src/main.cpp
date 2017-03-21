@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
       meas_package.raw_measurements_ << ro, phi, ro_dot;
       iss >> timestamp;
       meas_package.timestamp_ = timestamp;
-//      measurement_pack_list.push_back(meas_package);
+      measurement_pack_list.push_back(meas_package);
     }
 
     // read ground truth data to compare later

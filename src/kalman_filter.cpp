@@ -18,13 +18,6 @@ void KalmanFilter::Init(Eigen::VectorXd &x_in, Eigen::MatrixXd &P_in, Eigen::Mat
   H_ = H_in;
   R_ = R_in;
   Q_ = Q_in;
-
-//  cout << "x_= " << x_ << endl;
-//  cout << "P_= " << P_ << endl;
-//  cout << "F_= " << F_ << endl;
-//  cout << "H_= " << H_ << endl;
-//  cout << "R_= " << R_ << endl;
-//  cout << "Q_= " << Q_ << endl << endl;
 }
 
 void KalmanFilter::Predict() {
@@ -62,20 +55,20 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
   float vx = x_[2];
   float vy = x_[3];
 
-  Eigen::VectorXd h = Eigen::VectorXd(3);
-  float h1 = sqrt(px*px + py*py);
-  float h2 = atan(py/px);
-  float h3 = (px*vx + py*vy)/h1;
-  h << h1, h2, h3;
+  // maps x_ from Cartesian coordinates to polar coordinates
+  float rho = sqrt(px*px + py*py); // The range, ρ, is the distance to the pedestrian
+  float theta = atan(py/px); // φ is the angle between ρ and the x direction
+  float rho_dot = (px*vx + py*vy)/rho; // The range rate, ​ρ​˙, is the projection of the velocity, v
 
-  Eigen::VectorXd y = z - h;
-  cout << "y= " << y << endl;
   // The second value in the polar coordinate vector is the angle ϕ. Need to make sure to normalize ϕ in the y vector
   // so that its angle is between -pi and pi; in other words, add or subtract 2*pi from ϕ until it is
   // between -pi and pi.
-  y << y[0],
-       (y[1] - -1*M_PI)/(M_PI - -1*M_PI),
-       y[2];
+//  theta = (theta - -1*M_PI)/(M_PI - -1*M_PI);
+
+  Eigen::VectorXd hx = Eigen::VectorXd(3);
+  hx << rho, theta, rho_dot;
+
+  Eigen::VectorXd y = z - hx;
   Eigen::MatrixXd Ht = H_.transpose();
   Eigen::MatrixXd S = H_ * P_ * Ht + R_;
   Eigen::MatrixXd Si = S.inverse();
