@@ -157,14 +157,14 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
     ekf_.UpdateEKF(z);
+
+    // KF Prediction step
+//    ekf_.Predict();
   } else {
     // Laser updates
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, H_laser_, R_laser_, ekf_.Q_);
     ekf_.Update(z);
   }
-
-  // KF Prediction step
-//  ekf_.Predict();
 
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
