@@ -11,7 +11,7 @@ Eigen::VectorXd MeasurementPackage::estimations() {
 
   // If RADAR sensor type, convert estimation from
   // polar (rho, phi) to cartesian (x, y) coordinates.
-  if(sensor_type_ == SensorType::RADAR) {
+  if(sensor_type_ == RADAR) {
     result = Eigen::VectorXd(3);
 
     // RADAR estimation
