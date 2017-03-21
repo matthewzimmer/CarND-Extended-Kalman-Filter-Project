@@ -3,7 +3,6 @@ project(ExtendedKF)
 cmake_minimum_required (VERSION 3.5)
 
 add_definitions(-std=c++0x)
-include_directories("src/Eigen")
 
 set(sources
     src/FusionEKF.cpp
