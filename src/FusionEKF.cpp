@@ -60,7 +60,12 @@ FusionEKF::FusionEKF() {
 FusionEKF::~FusionEKF() {}
 
 bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
-
+  Eigen::VectorXd z = measurement_pack.raw_measurements_;
+  float px = z(0);
+  float py = z(1);
+  if (px == 0 || py == 0){
+    return false;
+  }
 
   /*****************************************************************************
    *  Initialization
@@ -78,7 +83,6 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
                0, 0, 1000, 0,
                0, 0, 0, 1000;
 
-    Eigen::VectorXd z = measurement_pack.raw_measurements_;
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       // Convert radar from polar to cartesian coordinates and initialize state
       // output the estimation in the cartesian coordinates
@@ -90,11 +94,11 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
       /**
       Initialize state.
       */
-      float px = z(0);
-      float py = z(1);
-      if (px == 0 || py == 0){
-        return false;
-      }
+//      float px = z(0);
+//      float py = z(1);
+//      if (px == 0 || py == 0){
+//        return false;
+//      }
 
       ekf_.x_ << px, py, 0, 0;
     }
@@ -145,10 +149,10 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+    ekf_.UpdateEKF(z);
   } else {
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, H_laser_, R_laser_, ekf_.Q_);
-    ekf_.Update(measurement_pack.raw_measurements_);
+    ekf_.Update(z);
   }
 
   return true;
