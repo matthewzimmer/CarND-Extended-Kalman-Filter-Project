@@ -6,7 +6,8 @@
 #include "Eigen/Dense"
 #include "FusionEKF.h"
 #include "ground_truth_package.h"
-#include "measurement_package.h"
+#include "LaserMeasurement.h"
+#include "RadarMeasurement.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "IncompatibleTypes"
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
 
   check_files(in_file_, in_file_name_, out_file_, out_file_name_);
 
-  vector<MeasurementPackage> measurement_pack_list;
+  vector<shared_ptr<MeasurementPackage>> measurement_pack_list;
   vector<GroundTruthPackage> gt_pack_list;
 
   string line;
@@ -73,7 +74,6 @@ int main(int argc, char *argv[]) {
   while (getline(in_file_, line)) {
 
     string sensor_type;
-    MeasurementPackage meas_package;
     GroundTruthPackage gt_package;
     istringstream iss(line);
     long long timestamp;
@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
     iss >> sensor_type;
     if (sensor_type.compare("L") == 0) {
       // LASER MEASUREMENT
+      LaserMeasurement meas_package;
 
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::LASER;
@@ -93,10 +94,11 @@ int main(int argc, char *argv[]) {
       meas_package.raw_measurements_ << x, y;
       iss >> timestamp;
       meas_package.timestamp_ = timestamp;
-      measurement_pack_list.push_back(meas_package);
+      measurement_pack_list.push_back(make_shared<LaserMeasurement>(meas_package));
 
     } else if (sensor_type.compare("R") == 0) {
       // RADAR MEASUREMENT
+      RadarMeasurement meas_package;
 
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
@@ -110,7 +112,7 @@ int main(int argc, char *argv[]) {
       meas_package.raw_measurements_ << ro, phi, ro_dot;
       iss >> timestamp;
       meas_package.timestamp_ = timestamp;
-      measurement_pack_list.push_back(meas_package);
+      measurement_pack_list.push_back(make_shared<RadarMeasurement>(meas_package));
     }
 
     // read ground truth data to compare later
@@ -137,9 +139,11 @@ int main(int argc, char *argv[]) {
   //Call the EKF-based fusion
   size_t N = measurement_pack_list.size(); // size_t docs: http://en.cppreference.com/w/cpp/types/size_t
   for (size_t k = 0; k < N; ++k) {
+    shared_ptr<MeasurementPackage> mp = measurement_pack_list[k];
+
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
-    bool measurement_updated = fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
+    bool measurement_updated = fusionEKF.ProcessMeasurement(*mp);
     if (measurement_updated) {
       // output the estimation
       out_file_ << fusionEKF.ekf_.x_(0) << "\t"; // px
@@ -149,14 +153,14 @@ int main(int argc, char *argv[]) {
 
 
       // output the measurements
-      if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER) {
+      if ((*mp).sensor_type_ == MeasurementPackage::LASER) {
         // output the estimation
-        out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
-        out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
-      } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
+        out_file_ << (*mp).raw_measurements_(0) << "\t";
+        out_file_ << (*mp).raw_measurements_(1) << "\t";
+      } else if ((*mp).sensor_type_ == MeasurementPackage::RADAR) {
         // output the estimation in the cartesian coordinates
-        float ro = measurement_pack_list[k].raw_measurements_(0);
-        float phi = measurement_pack_list[k].raw_measurements_(1);
+        float ro = (*mp).raw_measurements_(0);
+        float phi = (*mp).raw_measurements_(1);
         out_file_ << ro * cos(phi) << "\t"; // p1_meas
         out_file_ << ro * sin(phi) << "\t"; // ps_meas
       }
