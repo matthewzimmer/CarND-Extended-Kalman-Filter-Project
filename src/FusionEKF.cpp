@@ -85,21 +85,13 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       // Convert radar from polar to cartesian coordinates and initialize state
-      // output the estimation in the cartesian coordinates
+      // output the estimation in the cartesian coordinates. We do the conversion to
+      // cartesian because we always want x_ in cartesian coordinates.
       float rho = z(0);
       float phi = z(1);
       ekf_.x_ << rho*cos(phi), rho*sin(phi), 0, 0;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      /**
-      Initialize state.
-      */
-//      float px = z(0);
-//      float py = z(1);
-//      if (px == 0 || py == 0){
-//        return false;
-//      }
-
       ekf_.x_ << px, py, 0, 0;
     }
 

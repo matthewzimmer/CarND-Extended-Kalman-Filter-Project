@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
   for (size_t k = 0; k < N; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
-    bool measurementProcessed = fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
-    if (measurementProcessed) {
+    bool measurement_updated = fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
+    if (measurement_updated) {
       // output the estimation
       out_file_ << fusionEKF.ekf_.x_(0) << "\t"; // px
       out_file_ << fusionEKF.ekf_.x_(1) << "\t"; // py
