@@ -178,7 +178,12 @@ int main(int argc, char *argv[]) {
 
   // compute the accuracy (RMSE)
   Tools tools;
-  cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
+  Eigen::VectorXd rmse = tools.CalculateRMSE(estimations, ground_truth);
+  float px = rmse(0);
+  float py = rmse(1);
+  float vx = rmse(2);
+  float vy = rmse(3);
+  cout << "RMSE" << endl << px << endl << py << endl << vx << endl << vy << endl;
 
   // close files
   if (out_file_.is_open()) {
