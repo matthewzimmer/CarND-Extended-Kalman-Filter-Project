@@ -15,3 +15,7 @@ set(sources
     src/RadarMeasurement.h)
 
 add_executable(ExtendedKF ${sources})
+
+file(COPY ${CMAKE_SOURCE_DIR}/data/sample-laser-radar-measurement-data-1.txt DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/data/sample-laser-radar-measurement-data-2.txt DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/lib/kalman-tracker.py DESTINATION ${CMAKE_BINARY_DIR})
