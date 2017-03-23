@@ -9,3 +9,4 @@ build/
 .idea/
 cmake-build-debug
 *.iml
+bin/kalman_tracker_mac.app/
