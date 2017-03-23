@@ -54,7 +54,8 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z) {
 
   // maps x_ from Cartesian coordinates to polar coordinates
   float rho = sqrt(px * px + py * py); // The range, ρ, is the distance to the pedestrian
-  float theta = atan(py / px); // φ is the angle between ρ and the x direction
+//  float theta = atan(py / px); // φ is the angle between ρ and the x direction
+  float theta = atan2(py, px); // φ is the angle between ρ and the x direction
   float rho_dot = (px * vx + py * vy) / rho; // The range rate, ​ρ​˙, is the projection of the velocity, v
 
   Eigen::VectorXd hx = Eigen::VectorXd(3);

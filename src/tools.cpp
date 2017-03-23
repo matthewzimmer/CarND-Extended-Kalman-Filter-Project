@@ -57,7 +57,8 @@ Eigen::MatrixXd Tools::CalculateJacobian(const Eigen::VectorXd &x_state) {
   //compute the Jacobian matrix
   double px_py_sqrd_sum = (px*px + py*py);
   double rho = sqrt(px_py_sqrd_sum);
-  double phi = atan(py/px);
+//  double phi = atan(py/px);
+  double phi = atan2(py, px);
   double rho_dot = (px*vx+py*vy)/rho;
   double pow_px_py_sqrd_sum = pow(px_py_sqrd_sum, 3.0/2.0);
 
