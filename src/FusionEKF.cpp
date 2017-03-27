@@ -52,8 +52,8 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
   Eigen::VectorXd z = measurement_pack.raw_measurements_;
 
   // prevent devision by zero
-  float px = z(0);
-  float py = z(1);
+  double px = z(0);
+  double py = z(1);
   if (px == 0 || py == 0) {
     return false;
   }
@@ -69,8 +69,8 @@ bool FusionEKF::ProcessMeasurement(MeasurementPackage &measurement_pack) {
       // Convert radar from polar to cartesian coordinates and initialize state
       // output the estimation in the cartesian coordinates. We do the conversion to
       // cartesian because we always want x_ in cartesian coordinates.
-      float rho = z(0);
-      float phi = z(1);
+      double rho = z(0);
+      double phi = z(1);
       ekf_.x_ << rho * cos(phi), rho * sin(phi), 0, 0;
     } else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       ekf_.x_ << px, py, 0, 0;

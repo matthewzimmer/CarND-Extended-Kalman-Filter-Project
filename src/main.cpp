@@ -12,8 +12,8 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "IncompatibleTypes"
 using namespace std;
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
+//using Eigen::MatrixXd;
+//using Eigen::VectorXd;
 using std::vector;
 
 void check_arguments(int argc, char *argv[]) {
@@ -86,9 +86,9 @@ int main(int argc, char *argv[]) {
 
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::LASER;
-      meas_package.raw_measurements_ = VectorXd(2);
-      float x;
-      float y;
+      meas_package.raw_measurements_ = Eigen::VectorXd(2);
+      double x;
+      double y;
       iss >> x;
       iss >> y;
       meas_package.raw_measurements_ << x, y;
@@ -102,10 +102,10 @@ int main(int argc, char *argv[]) {
 
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
-      meas_package.raw_measurements_ = VectorXd(3);
-      float ro;
-      float phi;
-      float ro_dot;
+      meas_package.raw_measurements_ = Eigen::VectorXd(3);
+      double ro;
+      double phi;
+      double ro_dot;
       iss >> ro;
       iss >> phi;
       iss >> ro_dot;
@@ -116,15 +116,15 @@ int main(int argc, char *argv[]) {
     }
 
     // read ground truth data to compare later
-    float x_gt;
-    float y_gt;
-    float vx_gt;
-    float vy_gt;
+    double x_gt;
+    double y_gt;
+    double vx_gt;
+    double vy_gt;
     iss >> x_gt;
     iss >> y_gt;
     iss >> vx_gt;
     iss >> vy_gt;
-    gt_package.gt_values_ = VectorXd(4);
+    gt_package.gt_values_ = Eigen::VectorXd(4);
     gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
     gt_pack_list.push_back(gt_package);
   }
@@ -133,8 +133,8 @@ int main(int argc, char *argv[]) {
   FusionEKF fusionEKF;
 
   // used to compute the RMSE later
-  vector<VectorXd> estimations;
-  vector<VectorXd> ground_truth;
+  vector<Eigen::VectorXd> estimations;
+  vector<Eigen::VectorXd> ground_truth;
 
   //Call the EKF-based fusion
   size_t N = measurement_pack_list.size(); // size_t docs: http://en.cppreference.com/w/cpp/types/size_t
@@ -159,8 +159,8 @@ int main(int argc, char *argv[]) {
         out_file_ << (*mp).raw_measurements_(1) << "\t";
       } else if ((*mp).sensor_type_ == MeasurementPackage::RADAR) {
         // output the estimation in the cartesian coordinates
-        float ro = (*mp).raw_measurements_(0);
-        float phi = (*mp).raw_measurements_(1);
+        double ro = (*mp).raw_measurements_(0);
+        double phi = (*mp).raw_measurements_(1);
         out_file_ << ro * cos(phi) << "\t"; // p1_meas
         out_file_ << ro * sin(phi) << "\t"; // ps_meas
       }
@@ -179,10 +179,10 @@ int main(int argc, char *argv[]) {
   // compute the accuracy (RMSE)
   Tools tools;
   Eigen::VectorXd rmse = tools.CalculateRMSE(estimations, ground_truth);
-  float px = rmse(0);
-  float py = rmse(1);
-  float vx = rmse(2);
-  float vy = rmse(3);
+  double px = rmse(0);
+  double py = rmse(1);
+  double vx = rmse(2);
+  double vy = rmse(3);
   cout << "RMSE" << endl << px << endl << py << endl << vx << endl << vy << endl;
 
   // close files

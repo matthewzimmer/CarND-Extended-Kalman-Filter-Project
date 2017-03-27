@@ -41,10 +41,10 @@ Eigen::MatrixXd Tools::CalculateJacobian(const Eigen::VectorXd &x_state) {
   Eigen::MatrixXd Hj(3,4);
 
   //recover state parameters
-  float px = x_state(0);
-  float py = x_state(1);
-  float vx = x_state(2);
-  float vy = x_state(3);
+  double px = x_state(0);
+  double py = x_state(1);
+  double vx = x_state(2);
+  double vy = x_state(3);
 
   //TODO: YOUR CODE HERE
 
